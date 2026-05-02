@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brûlée — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --cream:    #fdf6ec;
+      --espresso: #2c1a0e;
+      --roast:    #6b3a1f;
+      --gold:     #c8882a;
+      --milk:     #f0e0c8;
+      --muted:    #9e7b5a;
+      --card-bg:  #fffaf4;
+      --border:   #e8d5bc;
+      --dark-bg:  #1a0f07;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--cream);
+      color: var(--espresso);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--espresso);
+      color: var(--cream);
+      padding: 1.2rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid var(--gold);
+    }
+    .header-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: var(--cream);
+      text-decoration: none;
+    }
+    .header-logo span { color: var(--gold); }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .header-right p { font-size: .78rem; color: rgba(253,246,236,.5); letter-spacing: .1em; text-transform: uppercase; }
+    .btn-back {
+      background: transparent;
+      border: 1px solid rgba(253,246,236,.2);
+      color: rgba(253,246,236,.7);
+      padding: .4rem 1rem;
+      border-radius: 4px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .8rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-back:hover { border-color: var(--gold); color: var(--cream); }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem; }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--border);
+    }
+    .tab {
+      padding: .75rem 1.8rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .85rem;
+      font-weight: 400;
+      letter-spacing: .06em;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: color .2s, border-color .2s;
+    }
+    .tab.active { color: var(--espresso); border-bottom-color: var(--gold); font-weight: 500; }
+    .tab:hover { color: var(--espresso); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── FORM ── */
+    .form-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 2rem 2.2rem;
+      max-width: 580px;
+    }
+    .form-card h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: .3rem;
+    }
+    .form-card p { font-size: .85rem; color: var(--muted); margin-bottom: 1.8rem; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { margin-bottom: 1.1rem; }
+    .form-label {
+      display: block;
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: .35rem;
+    }
+    .form-control, .form-select {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      padding: .6rem .9rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem;
+      color: var(--espresso);
+      background: #fff;
+      transition: border-color .2s;
+    }
+    .form-control:focus, .form-select:focus { outline: none; border-color: var(--gold); }
+    .price-display {
+      background: var(--milk);
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      padding: .6rem .9rem;
+      font-size: .9rem;
+      font-weight: 500;
+      color: var(--roast);
+    }
+    .btn-submit {
+      width: 100%;
+      background: var(--espresso);
+      color: var(--cream);
+      border: none;
+      padding: .8rem;
+      border-radius: 4px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: .5rem;
+      transition: background .2s;
+      letter-spacing: .04em;
+    }
+    .btn-submit:hover { background: var(--roast); }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      top: 1.2rem; right: 1.2rem;
+      background: var(--espresso);
+      color: var(--cream);
+      padding: .7rem 1.3rem;
+      border-left: 4px solid var(--gold);
+      border-radius: 4px;
+      font-size: .85rem;
+      opacity: 0;
+      transform: translateX(20px);
+      transition: opacity .3s, transform .3s;
+      z-index: 999;
+    }
+    #toast.show { opacity: 1; transform: translateX(0); }
+    #toast.error { border-left-color: #8b2020; }
+
+    /* ── BOOKINGS TABLE ── */
+    .table-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.2rem;
+    }
+    .table-header h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    .badge-count {
+      background: var(--gold);
+      color: #fff;
+      font-size: .72rem;
+      font-weight: 500;
+      padding: .2rem .65rem;
+      border-radius: 20px;
+      margin-left: .5rem;
+    }
+    .btn-refresh {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+      padding: .45rem 1rem;
+      border-radius: 4px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .8rem;
+      cursor: pointer;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-refresh:hover { border-color: var(--gold); color: var(--espresso); }
+
+    .table-wrap {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: var(--espresso); }
+    thead th {
+      color: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: .9rem 1rem;
+      text-align: left;
+      white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--milk); }
+    tbody td { padding: .85rem 1rem; font-size: .86rem; vertical-align: middle; }
+
+    .status-badge {
+      display: inline-block;
+      padding: .2rem .7rem;
+      border-radius: 20px;
+      font-size: .72rem;
+      font-weight: 500;
+      text-transform: capitalize;
+    }
+    .status-pending   { background: #fef3c7; color: #92400e; }
+    .status-confirmed { background: #d1fae5; color: #065f46; }
+    .status-completed { background: #e0e7ff; color: #3730a3; }
+
+    .status-select {
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      padding: .25rem .5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .78rem;
+      color: var(--espresso);
+      background: #fff;
+      cursor: pointer;
+    }
+    .status-select:focus { outline: none; border-color: var(--gold); }
+
+    .btn-delete {
+      background: #f5e0e0;
+      color: #8b2020;
+      border: none;
+      border-radius: 4px;
+      padding: .3rem .75rem;
+      font-size: .78rem;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-delete:hover { background: #e8c0c0; }
+
+    #bookings-loading, #bookings-empty {
+      text-align: center;
+      padding: 3rem;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+    #bookings-empty .icon { font-size: 2rem; margin-bottom: .5rem; }
+
+    @media (max-width: 600px) {
+      header { flex-direction: column; gap: .8rem; align-items: flex-start; }
+      .form-row { grid-template-columns: 1fr; }
+      .hide-mobile { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <a class="header-logo" href="index.html">Brû<span>lée</span></a>
+  <div class="header-right">
+    <p>Admin Panel</p>
+    <a class="btn-back" href="index.html">← Back to Site</a>
+  </div>
+</header>
+
+<!-- ── MAIN ── -->
+<div class="container">
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('book')">New Booking</button>
+    <button class="tab" onclick="switchTab('bookings')">All Bookings</button>
+  </div>
+
+  <!-- ── TAB: New Booking ── -->
+  <div class="tab-content active" id="tab-book">
+    <div class="form-card">
+      <h2>New Booking</h2>
+      <p>Fill in the details below to place a manual order.</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Customer Name *</label>
+          <input class="form-control" id="f-name" type="text" placeholder="e.g. Anurag"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone *</label>
+          <input class="form-control" id="f-phone" type="tel" placeholder="e.g. 9876543210"/>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Coffee *</label>
+          <select class="form-select" id="f-coffee" onchange="calcPrice()">
+            <option value="">Select coffee…</option>
+            <option>Espresso</option>
+            <option>Cappuccino</option>
+            <option>Latte</option>
+            <option>Americano</option>
+            <option>Mocha</option>
+            <option>Cold Coffee</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Size *</label>
+          <select class="form-select" id="f-size" onchange="calcPrice()">
+            <option value="">Select size…</option>
+            <option>Small</option>
+            <option>Regular</option>
+            <option>Medium</option>
+            <option>Large</option>
+            <option>Extra Large</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Quantity *</label>
+          <select class="form-select" id="f-qty" onchange="calcPrice()">
+            <option value="">Select…</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pickup Time *</label>
+          <select class="form-select" id="f-time">
+            <option value="">Select time…</option>
+            <option>9:00 AM</option>
+            <option>10:00 AM</option>
+            <option>11:00 AM</option>
+            <option>12:00 PM</option>
+            <option>2:00 PM</option>
+            <option>4:00 PM</option>
+            <option>6:00 PM</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Total Price</label>
+        <div class="price-display" id="price-display">— Select coffee, size & quantity</div>
+      </div>
+
+      <button class="btn-submit" onclick="submitBooking()">Confirm Booking</button>
+    </div>
+  </div>
+
+  <!-- ── TAB: All Bookings ── -->
+  <div class="tab-content" id="tab-bookings">
+    <div class="table-header">
+      <div>
+        <h2>All Bookings <span class="badge-count" id="booking-count">0</span></h2>
+      </div>
+      <button class="btn-refresh" onclick="loadBookings()">↻ Refresh</button>
+    </div>
+
+    <div class="table-wrap">
+      <div id="bookings-loading">Loading bookings…</div>
+      <div id="bookings-empty" style="display:none">
+        <div class="icon">📋</div>
+        <p>No bookings yet.</p>
+      </div>
+      <table id="bookings-table" style="display:none">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>Coffee</th>
+            <th>Size</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Pickup</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="bookings-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+  const API = 'http://localhost:8000';
+
+  const PRICES = {
+    "Espresso":    {"Small":3.0,"Regular":3.5,"Medium":4.0,"Large":4.5,"Extra Large":5.0},
+    "Cappuccino":  {"Small":3.5,"Regular":4.0,"Medium":4.5,"Large":5.0,"Extra Large":5.5},
+    "Latte":       {"Small":4.0,"Regular":4.5,"Medium":5.0,"Large":5.5,"Extra Large":6.0},
+    "Americano":   {"Small":3.0,"Regular":3.5,"Medium":4.0,"Large":4.5,"Extra Large":5.0},
+    "Mocha":       {"Small":4.5,"Regular":5.0,"Medium":5.5,"Large":6.0,"Extra Large":6.5},
+    "Cold Coffee": {"Small":4.0,"Regular":4.5,"Medium":5.0,"Large":5.5,"Extra Large":6.0},
+  };
+
+  // ── Tabs ──
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['book','bookings'][i] === name));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    if (name === 'bookings') loadBookings();
+  }
+
+  // ── Price calculator ──
+  function calcPrice() {
+    const coffee = document.getElementById('f-coffee').value;
+    const size   = document.getElementById('f-size').value;
+    const qty    = parseInt(document.getElementById('f-qty').value) || 0;
+    if (coffee && size && qty) {
+      const unit  = PRICES[coffee]?.[size] || 0;
+      const total = (unit * qty).toFixed(2);
+      document.getElementById('price-display').textContent = `$${total}`;
+    } else {
+      document.getElementById('price-display').textContent = '— Select coffee, size & quantity';
+    }
+  }
+
+  // ── Submit booking ──
+  async function submitBooking() {
+    const name   = document.getElementById('f-name').value.trim();
+    const phone  = document.getElementById('f-phone').value.trim();
+    const coffee = document.getElementById('f-coffee').value;
+    const size   = document.getElementById('f-size').value;
+    const qty    = parseInt(document.getElementById('f-qty').value);
+    const time   = document.getElementById('f-time').value;
+
+    if (!name || !phone || !coffee || !size || !qty || !time) {
+      showToast('Please fill in all fields.', true); return;
+    }
+
+    const unit  = PRICES[coffee]?.[size] || 0;
+    const price = parseFloat((unit * qty).toFixed(2));
+
+    try {
+      const res = await fetch(`${API}/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: name,
+          phone, coffee_name: coffee,
+          size, quantity: qty,
+          price, pickup_time: time
+        })
+      });
+      if (!res.ok) throw new Error();
+      showToast('Booking confirmed! ☕');
+      clearForm();
+    } catch {
+      showToast('Failed to create booking. Check backend.', true);
+    }
+  }
+
+  function clearForm() {
+    ['f-name','f-phone'].forEach(id => document.getElementById(id).value = '');
+    ['f-coffee','f-size','f-qty','f-time'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('price-display').textContent = '— Select coffee, size & quantity';
+  }
+
+  // ── Load bookings ──
+  async function loadBookings() {
+    document.getElementById('bookings-loading').style.display = 'block';
+    document.getElementById('bookings-table').style.display = 'none';
+    document.getElementById('bookings-empty').style.display = 'none';
+
+    try {
+      const res = await fetch(`${API}/bookings`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      document.getElementById('bookings-loading').style.display = 'none';
+      document.getElementById('booking-count').textContent = data.length;
+
+      if (!data.length) {
+        document.getElementById('bookings-empty').style.display = 'block'; return;
+      }
+
+      document.getElementById('bookings-table').style.display = 'table';
+      document.getElementById('bookings-body').innerHTML = data.map(b => `
+        <tr id="row-${b.id}">
+          <td style="color:var(--muted);font-size:.78rem">${b.id}</td>
+          <td style="font-weight:500">${esc(b.customer_name)}</td>
+          <td style="color:var(--muted)">${esc(b.phone)}</td>
+          <td>${esc(b.coffee_name)}</td>
+          <td>${esc(b.size)}</td>
+          <td>${b.quantity}</td>
+          <td style="font-weight:500;color:var(--roast)">$${parseFloat(b.price).toFixed(2)}</td>
+          <td>${esc(b.pickup_time)}</td>
+          <td>
+            <select class="status-select" onchange="updateStatus(${b.id}, this.value)">
+              <option ${b.status==='pending'?'selected':''}>pending</option>
+              <option ${b.status==='confirmed'?'selected':''}>confirmed</option>
+              <option ${b.status==='completed'?'selected':''}>completed</option>
+            </select>
+          </td>
+          <td>
+            <button class="btn-delete" onclick="deleteBooking(${b.id})">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    } catch {
+      document.getElementById('bookings-loading').textContent = '⚠ Could not connect to backend.';
+    }
+  }
+
+  // ── Update status ──
+  async function updateStatus(id, status) {
+    try {
+      const res = await fetch(`${API}/bookings/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      if (!res.ok) throw new Error();
+      showToast(`Status updated to ${status}.`);
+    } catch {
+      showToast('Failed to update status.', true);
+    }
+  }
+
+  // ── Delete ──
+  async function deleteBooking(id) {
+    if (!confirm('Delete this booking?')) return;
+    try {
+      const res = await fetch(`${API}/bookings/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+      document.getElementById('row-' + id)?.remove();
+      showToast('Booking deleted.');
+      const count = document.querySelectorAll('#bookings-body tr').length;
+      document.getElementById('booking-count').textContent = count;
+      if (!count) {
+        document.getElementById('bookings-table').style.display = 'none';
+        document.getElementById('bookings-empty').style.display = 'block';
+      }
+    } catch {
+      showToast('Failed to delete.', true);
+    }
+  }
+
+  // ── Toast ──
+  function showToast(msg, isError = false) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = isError ? 'error' : '';
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 3000);
+  }
+
+  function esc(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+</script>
+</body>
+</html>

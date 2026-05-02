@@ -1,0 +1,31 @@
+services:
+
+  backend:
+    build: .
+    container_name: coffee-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure
+
+  db:
+    image: postgres:16.13
+    container_name: coffee-db
+    environment:
+      POSTGRES_DB: coffee_db
+      POSTGRES_USER: coffee_user
+      POSTGRES_PASSWORD: coffee_password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coffee_user -d coffee_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
