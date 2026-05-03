@@ -1,0 +1,52 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ap-south-1 | \
+          docker login --username AWS --password-stdin \
+          376366860525.dkr.ecr.ap-south-1.amazonaws.com
+
+      - name: Build and push Docker image to ECR
+        run: |
+          docker build -t coffee-backend .
+          docker tag coffee-backend:latest \
+            376366860525.dkr.ecr.ap-south-1.amazonaws.com/coffee-backend:latest
+          docker push \
+            376366860525.dkr.ecr.ap-south-1.amazonaws.com/coffee-backend:latest
+
+      - name: SSH into EC2 and redeploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            aws ecr get-login-password --region ap-south-1 | \
+              docker login --username AWS --password-stdin \
+              376366860525.dkr.ecr.ap-south-1.amazonaws.com
+            docker pull 376366860525.dkr.ecr.ap-south-1.amazonaws.com/coffee-backend:latest
+            docker stop coffee-backend || true
+            docker rm coffee-backend || true
+            docker run -d --name coffee-backend -p 8000:8000 \
+              --env-file ~/.env \
+              376366860525.dkr.ecr.ap-south-1.amazonaws.com/coffee-backend:latest
