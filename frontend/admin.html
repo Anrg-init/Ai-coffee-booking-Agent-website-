@@ -14,8 +14,6 @@
 <!-- ── HEADER ── -->
 <header>
   <a class="header-logo" href="index.html">Brû<span>lée</span></a>
-  <div class="header-right">
-    <p>Admin Panel</p>
     <a class="btn-back" href="index.html">← Back to Site</a>
   </div>
 </header>
@@ -26,7 +24,6 @@
   <!-- Tabs -->
   <div class="tabs">
     <button class="tab active" onclick="switchTab('book')">New Booking</button>
-    <button class="tab" onclick="switchTab('bookings')">All Bookings</button>
   </div>
 
   <!-- ── TAB: New Booking ── -->
@@ -108,43 +105,7 @@
     </div>
   </div>
 
-  <!-- ── TAB: All Bookings ── -->
-  <div class="tab-content" id="tab-bookings">
-    <div class="table-header">
-      <div>
-        <h2>All Bookings <span class="badge-count" id="booking-count">0</span></h2>
-      </div>
-      <button class="btn-refresh" onclick="loadBookings()">↻ Refresh</button>
-    </div>
-
-    <div class="table-wrap">
-      <div id="bookings-loading">Loading bookings…</div>
-      <div id="bookings-empty" style="display:none">
-        <div class="icon">📋</div>
-        <p>No bookings yet.</p>
-      </div>
-      <table id="bookings-table" style="display:none">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Customer</th>
-            <th>Phone</th>
-            <th>Coffee</th>
-            <th>Size</th>
-            <th>Qty</th>
-            <th>Price</th>
-            <th>Pickup</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="bookings-body"></tbody>
-      </table>
-    </div>
-  </div>
-
-</div>
-
+  
 <!-- Toast -->
 <div id="toast"></div>
 
@@ -241,11 +202,9 @@
       }
 
       document.getElementById('bookings-table').style.display = 'table';
-      document.getElementById('bookings-body').innerHTML = data.map(b => `
+      document.getElementById('bookings-body').innerHTML = data.map((b, i) => `
         <tr id="row-${b.id}">
-          <td style="color:var(--muted);font-size:.78rem">${b.id}</td>
-          <td style="font-weight:500">${esc(b.customer_name)}</td>
-          <td style="color:var(--muted)">${esc(b.phone)}</td>
+          <td style="color:var(--muted);font-size:.78rem;font-weight:600">#${i + 1}</td>
           <td>${esc(b.coffee_name)}</td>
           <td>${esc(b.size)}</td>
           <td>${b.quantity}</td>
